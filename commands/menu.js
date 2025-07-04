@@ -1,29 +1,34 @@
-// commands/menu.js
-
 module.exports = {
     name: 'menu',
-    description: 'Menampilkan semua perintah yang tersedia.',
-    execute(client, msg, args) {
-        let menuMessage = `
-╭───⌬ *🤖 DY BOT MENU* ⌬───╮
-│ Berikut adalah daftar perintah yang tersedia:
-╰─────────────────────────╯
-`;
-
-        const commands = client.commands;
-
-        commands.forEach(command => {
-            menuMessage += `🔹 *!${command.name}*\n`;
-            menuMessage += `   _${command.description}_\n\n`;
-        });
-
-        menuMessage += `╭───────────────╮
-│  📌 Ketik *!help <nama_perintah>* 
-│  untuk info lebih lanjut.
-╰───────────────╯
-
-✨ copyright by @davidfes`;
-
-        client.sendMessage(msg.from, menuMessage.trim());
-    },
+    description: 'Menampilkan daftar menu perintah.',
+    async execute(sock, msg, args) {
+        const from = msg.key.remoteJid;
+        const menuText = `
+╭───「 *MENU BOT* 」
+│
+│ Halo! Aku bot buatan Muna-kun.
+│ Ini daftar perintah yang bisa kamu pakai:
+│
+│ ❏  *.ig <link>*
+│     Download video Reels Instagram.
+│
+│ ❏  *.tiktok <link>*
+│     Download video TikTok tanpa watermark.
+│
+│ ❏  *.ai <pertanyaan>*
+│     Tanya apa saja ke AI Gemini.
+│
+│ ❏  *.stiker*
+│     Balas gambar/video atau kirim dengan
+│     caption .stiker untuk mengubahnya
+│     jadi stiker.
+│
+│ ❏  *.tagall*
+│     Sebut (mention) semua anggota di
+│     grup ini.
+│
+╰───「 ✨ 」
+        `;
+        await sock.sendMessage(from, { text: menuText }, { quoted: msg });
+    }
 };

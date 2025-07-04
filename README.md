@@ -45,10 +45,6 @@ Jika bot kamu memiliki file konfigurasi (misalnya `config.json`), pastikan sudah
 
 * Gunakan terminal yang mendukung tampilan QR code (misalnya Terminal bawaan, iTerm, atau VSCode Terminal).
 
-## 📝 Lisensi
-
-Proyek ini dilisensikan di bawah lisensi MIT.
-
 ---
 
 Selamat mencoba! 🚀

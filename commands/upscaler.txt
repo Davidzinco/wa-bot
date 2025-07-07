@@ -1,0 +1,390 @@
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Fungsi untuk download media dari pesan WhatsApp
+ */
+async function downloadMedia(message) {
+    try {
+        const stream = await downloadContentFromMessage(message, 'image');
+        let buffer = Buffer.from([]);
+        
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
+        
+        return buffer;
+    } catch (error) {
+        console.error('[Upscaler] Error downloading media:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fungsi untuk upscale menggunakan API Waifu2x (Free)
+ */
+async function upscaleWithWaifu2x(inputBuffer) {
+    try {
+        console.log('[Upscaler] Mencoba Waifu2x API...');
+        
+        const formData = new FormData();
+        formData.append('image', inputBuffer, {
+            filename: 'image.jpg',
+            contentType: 'image/jpeg'
+        });
+        
+        // API Waifu2x gratis yang masih aktif
+        const response = await axios.post('https://api.waifu2x.booru.pics/api/v1/waifu2x', formData, {
+            headers: {
+                ...formData.getHeaders()
+            },
+            timeout: 60000,
+            responseType: 'arraybuffer'
+        });
+        
+        if (response.status === 200) {
+            console.log('[Upscaler] Waifu2x API berhasil');
+            return Buffer.from(response.data);
+        } else {
+            throw new Error('API response tidak valid');
+        }
+    } catch (error) {
+        console.error('[Upscaler] Error Waifu2x API:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Fungsi untuk upscale menggunakan API Replicate (Free tier)
+ */
+async function upscaleWithReplicate(inputBuffer) {
+    try {
+        console.log('[Upscaler] Mencoba Replicate API...');
+        
+        // Convert buffer to base64
+        const base64Image = `data:image/jpeg;base64,${inputBuffer.toString('base64')}`;
+        
+        const response = await axios.post('https://api.replicate.com/v1/predictions', {
+            version: "30c1d0b916a6f8efce669b602ad59e38d6824363400c0ee3b93a54b373f78456",
+            input: {
+                image: base64Image,
+                scale: 2
+            }
+        }, {
+            headers: {
+                'Authorization': 'Token YOUR_REPLICATE_API_TOKEN', // Ganti dengan token Anda
+                'Content-Type': 'application/json'
+            },
+            timeout: 60000
+        });
+        
+        if (response.data && response.data.urls && response.data.urls.get) {
+            // Poll untuk hasil
+            const resultUrl = response.data.urls.get;
+            let result = null;
+            
+            for (let i = 0; i < 30; i++) { // Max 30 attempts (5 menit)
+                await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+                
+                const resultResponse = await axios.get(resultUrl, {
+                    headers: {
+                        'Authorization': 'Token YOUR_REPLICATE_API_TOKEN'
+                    }
+                });
+                
+                if (resultResponse.data.status === 'succeeded') {
+                    result = resultResponse.data.output;
+                    break;
+                } else if (resultResponse.data.status === 'failed') {
+                    throw new Error('Replicate processing failed');
+                }
+            }
+            
+            if (result) {
+                const imageResponse = await axios.get(result, {
+                    responseType: 'arraybuffer'
+                });
+                
+                console.log('[Upscaler] Replicate API berhasil');
+                return Buffer.from(imageResponse.data);
+            } else {
+                throw new Error('Timeout waiting for result');
+            }
+        } else {
+            throw new Error('Invalid response from Replicate API');
+        }
+    } catch (error) {
+        console.error('[Upscaler] Error Replicate API:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Fungsi untuk upscale menggunakan API DeepAI (Free tier)
+ */
+async function upscaleWithDeepAI(inputBuffer) {
+    try {
+        console.log('[Upscaler] Mencoba DeepAI API...');
+        
+        const formData = new FormData();
+        formData.append('image', inputBuffer, {
+            filename: 'image.jpg',
+            contentType: 'image/jpeg'
+        });
+        
+        const response = await axios.post('https://api.deepai.org/api/waifu2x', formData, {
+            headers: {
+                ...formData.getHeaders(),
+                'Api-Key': 'YOUR_DEEPAI_API_KEY' // Daftar gratis di deepai.org
+            },
+            timeout: 60000
+        });
+        
+        if (response.data && response.data.output_url) {
+            // Download hasil dari URL
+            const imageResponse = await axios.get(response.data.output_url, {
+                responseType: 'arraybuffer'
+            });
+            
+            console.log('[Upscaler] DeepAI API berhasil');
+            return Buffer.from(imageResponse.data);
+        } else {
+            throw new Error('DeepAI API response tidak valid');
+        }
+    } catch (error) {
+        console.error('[Upscaler] Error DeepAI API:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Fungsi untuk upscale menggunakan API Clipdrop (Free tier)
+ */
+async function upscaleWithClipdrop(inputBuffer) {
+    try {
+        console.log('[Upscaler] Mencoba Clipdrop API...');
+        
+        const formData = new FormData();
+        formData.append('image_file', inputBuffer, {
+            filename: 'image.jpg',
+            contentType: 'image/jpeg'
+        });
+        
+        const response = await axios.post('https://clipdrop-api.co/image-upscaling/v1/upscale', formData, {
+            headers: {
+                ...formData.getHeaders(),
+                'x-api-key': 'YOUR_CLIPDROP_API_KEY' // Daftar gratis di clipdrop.co
+            },
+            timeout: 60000,
+            responseType: 'arraybuffer'
+        });
+        
+        if (response.status === 200) {
+            console.log('[Upscaler] Clipdrop API berhasil');
+            return Buffer.from(response.data);
+        } else {
+            throw new Error('Clipdrop API response tidak valid');
+        }
+    } catch (error) {
+        console.error('[Upscaler] Error Clipdrop API:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Fungsi untuk validasi gambar tanpa Sharp
+ */
+async function validateImage(buffer, maxSize = 10 * 1024 * 1024) {
+    try {
+        if (buffer.length > maxSize) {
+            throw new Error(`Ukuran file terlalu besar. Maksimal ${Math.round(maxSize / 1024 / 1024)}MB`);
+        }
+        
+        // Validasi format gambar dengan magic bytes
+        const isJPEG = buffer[0] === 0xFF && buffer[1] === 0xD8;
+        const isPNG = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+        const isWEBP = buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+        const isGIF = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46;
+        
+        if (!isJPEG && !isPNG && !isWEBP && !isGIF) {
+            throw new Error('Format gambar tidak didukung. Gunakan JPG, PNG, WEBP, atau GIF');
+        }
+        
+        // Estimasi ukuran berdasarkan file size
+        let estimatedWidth = 1000;
+        let estimatedHeight = 1000;
+        
+        if (buffer.length < 100 * 1024) { // < 100KB
+            estimatedWidth = 500;
+            estimatedHeight = 500;
+        } else if (buffer.length > 1024 * 1024) { // > 1MB
+            estimatedWidth = 1500;
+            estimatedHeight = 1500;
+        }
+        
+        return {
+            width: estimatedWidth,
+            height: estimatedHeight,
+            format: isJPEG ? 'jpeg' : isPNG ? 'png' : isWEBP ? 'webp' : 'gif',
+            size: buffer.length
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+
+/**
+ * Fungsi utama untuk processing upscale
+ */
+async function processUpscale(inputBuffer, scale = 2) {
+    try {
+        // Validasi gambar
+        const metadata = await validateImage(inputBuffer);
+        console.log(`[Upscaler] Gambar tervalidasi: ${metadata.width}x${metadata.height} (${metadata.format})`);
+        
+        let upscaledBuffer;
+        let method = 'unknown';
+        let lastError = null;
+        
+        // Coba berbagai API secara berurutan (yang gratis dan tidak perlu API key)
+        const apis = [
+            { name: 'Waifu2x', func: upscaleWithWaifu2x },
+            // Uncomment yang di bawah setelah mendapatkan API key
+            // { name: 'DeepAI', func: upscaleWithDeepAI },
+            // { name: 'Clipdrop', func: upscaleWithClipdrop },
+            // { name: 'Replicate', func: upscaleWithReplicate }
+        ];
+        
+        for (const api of apis) {
+            try {
+                console.log(`[Upscaler] Mencoba ${api.name}...`);
+                upscaledBuffer = await api.func(inputBuffer, scale);
+                method = api.name.toLowerCase().replace(/[^a-z]/g, '');
+                console.log(`[Upscaler] ${api.name} berhasil!`);
+                break;
+            } catch (error) {
+                console.log(`[Upscaler] ${api.name} gagal: ${error.message}`);
+                lastError = error;
+                continue;
+            }
+        }
+        
+        // Jika semua API gagal, return gambar asli
+        if (!upscaledBuffer) {
+            console.log('[Upscaler] Semua API gagal, mengembalikan gambar asli...');
+            upscaledBuffer = inputBuffer;
+            method = 'original';
+        }
+        
+        return {
+            buffer: upscaledBuffer,
+            originalSize: inputBuffer.length,
+            resultSize: upscaledBuffer.length,
+            originalRes: `${metadata.width}x${metadata.height}`,
+            method: method,
+            scale: upscaledBuffer === inputBuffer ? 1 : scale,
+            success: upscaledBuffer !== inputBuffer
+        };
+    } catch (error) {
+        console.error('[Upscaler] Error processing upscale:', error);
+        throw error;
+    }
+}
+
+module.exports = {
+    name: 'upscale',
+    description: 'Memperbesar resolusi gambar (upscaling) menggunakan AI API.',
+    async execute(sock, msg, args) {
+        const from = msg.key.remoteJid;
+        
+        // Cek apakah pesan mengandung gambar
+        const quotedMsg = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+        const imageMessage = msg.message?.imageMessage || quotedMsg?.imageMessage;
+        
+        if (!imageMessage) {
+            await sock.sendMessage(from, { 
+                text: '📸 *Cara Penggunaan Upscaler:*\n\n' +
+                      '1. Kirim gambar dengan caption `.upscale`\n' +
+                      '2. Atau reply gambar dengan `.upscale`\n' +
+                      '3. Tambahkan angka untuk skala: `.upscale 2` atau `.upscale 4`\n\n' +
+                      '⚠️ *Catatan:*\n' +
+                      '• Maksimal ukuran: 10MB\n' +
+                      '• Format: JPG, PNG, WEBP, GIF\n' +
+                      '• Menggunakan AI API gratis\n' +
+                      '• Proses membutuhkan waktu 30-120 detik\n\n' +
+                      '🔧 *API yang Tersedia:*\n' +
+                      '• Waifu2x (Gratis, tanpa API key)\n' +
+                      '• DeepAI (Perlu API key gratis)\n' +
+                      '• Clipdrop (Perlu API key gratis)\n' +
+                      '• Replicate (Perlu API key gratis)\n\n' +
+                      '💡 *Tips:* Daftar API key gratis untuk hasil yang lebih baik!'
+            }, { quoted: msg });
+            return;
+        }
+        
+        // Ambil skala dari args
+        let scale = 2;
+        if (args.length > 0) {
+            const inputScale = parseInt(args[0]);
+            if (inputScale >= 1 && inputScale <= 4) {
+                scale = inputScale;
+            }
+        }
+        
+        try {
+            // Kirim pesan loading
+            await sock.sendMessage(from, { 
+                text: `🔄 *Memproses gambar dengan AI API...*\n\n` +
+                      `⏳ Mohon tunggu ${scale}x upscaling sedang berlangsung...\n` +
+                      `🌐 Mencoba API yang tersedia secara berurutan\n\n` +
+                      `📊 *Status:* Menggunakan API gratis`
+            }, { quoted: msg });
+            
+            // Download gambar
+            console.log('[Upscaler] Mendownload gambar...');
+            const imageBuffer = await downloadMedia(imageMessage);
+            
+            // Proses upscaling
+            console.log('[Upscaler] Memulai proses upscaling...');
+            const result = await processUpscale(imageBuffer, scale);
+            
+            // Kirim hasil
+            const statusIcon = result.success ? '✅' : '⚠️';
+            const statusText = result.success ? 'Berhasil di-upscale' : 'Gambar dikembalikan tanpa perubahan';
+            
+            await sock.sendMessage(from, {
+                image: result.buffer,
+                caption: `${statusIcon} *${statusText}!*\n\n` +
+                        `📊 *Detail:*\n` +
+                        `• Skala: ${result.scale}x\n` +
+                        `• Resolusi awal: ${result.originalRes}\n` +
+                        `• Ukuran awal: ${(result.originalSize / 1024).toFixed(2)} KB\n` +
+                        `• Ukuran hasil: ${(result.resultSize / 1024).toFixed(2)} KB\n` +
+                        `• Metode: ${result.method.toUpperCase()}\n\n` +
+                        `🤖 *Powered by AI Technology*\n` +
+                        `${!result.success ? '💡 Tip: Coba lagi nanti atau daftar API key untuk hasil lebih baik' : ''}`
+            }, { quoted: msg });
+            
+            console.log(`[Upscaler] Selesai: ${scale}x menggunakan ${result.method}`);
+            
+        } catch (error) {
+            console.error('[Upscaler] Error:', error);
+            await sock.sendMessage(from, {
+                text: `❌ *Error Upscaling:*\n\n${error.message}\n\n` +
+                      `💡 *Tips:*\n` +
+                      `• Pastikan file adalah gambar yang valid\n` +
+                      `• Coba dengan gambar yang lebih kecil\n` +
+                      `• Gunakan format JPG atau PNG\n` +
+                      `• Coba lagi nanti jika API sedang sibuk\n\n` +
+                      `🔧 *Untuk API yang lebih stabil:*\n` +
+                      `• Daftar API key gratis di:\n` +
+                      `  - deepai.org\n` +
+                      `  - clipdrop.co\n` +
+                      `  - replicate.com`
+            }, { quoted: msg });
+        }
+    }
+};

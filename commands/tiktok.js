@@ -42,7 +42,7 @@ module.exports = {
         }
 
         console.log(`[TikTok] Perintah diterima dari ${from} dengan URL: ${url}`);
-        await sock.sendMessage(from, { text: 'Oke, pakai teknik baru nih buat download... Sabar ya. 🚀' }, { quoted: msg });
+        await sock.sendMessage(from, { text: 'Wait...' }, { quoted: msg });
         
         const videoBuffer = await downloadTikTok(url);
         await sock.sendMessage(from, { 

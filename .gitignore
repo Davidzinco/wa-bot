@@ -1,3 +1,15 @@
-/.wwebjs_auth
-/.wwebjs_cache
-/node_modules
+# Folder dependensi Node.js (Wajib di-ignore!)
+node_modules
+
+# Folder sesi login Baileys (Rahasia, jangan di-upload!)
+auth_info_baileys
+
+# File-file sementara yang kita buat
+temp_in_*
+temp_out_*
+temp_text_*
+temp_font_*
+
+# Log dan file sistem operasi
+*.log
+.DS_Store

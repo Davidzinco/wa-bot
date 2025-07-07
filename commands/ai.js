@@ -1,5 +1,3 @@
-// const fetch = require('node-fetch'); // Baris ini kita hapus karena Node.js v22 sudah punya fetch bawaan
-
 /**
  * Fungsi untuk berinteraksi dengan Google Gemini AI
  * @param {string} prompt Pertanyaan atau perintah dari user
@@ -49,7 +47,9 @@ module.exports = {
             return;
         }
         
-        await sock.sendMessage(from, { text: 'Oke, aku tanyain ke Gemini dulu ya... 🤖' }, { quoted: msg });
+        await sock.sendMessage(from, { text: 'Wait... Let Me Think' }, { quoted: msg });
+
+
         const aiResponse = await chatWithGemini(userPrompt);
         await sock.sendMessage(from, { text: aiResponse }, { quoted: msg });
     }

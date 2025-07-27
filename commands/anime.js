@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { translate } = require('@vitalets/google-translate-api'); // <-- IMPORT INI
+const { translate } = require('@vitalets/google-translate-api'); 
 
 module.exports = {
     name: 'anime',
@@ -25,7 +25,6 @@ module.exports = {
                 return;
             }
 
-            // --- BAGIAN BARU UNTUK TRANSLATE ---
             let sinopsisTranslated = 'Tidak ada sinopsis.';
             const sinopsisOriginal = searchResult.synopsis;
 
@@ -39,7 +38,6 @@ module.exports = {
                     sinopsisTranslated = sinopsisOriginal + "\n\n(Gagal menerjemahkan ke Bahasa Indonesia)";
                 }
             }
-            // --- AKHIR BAGIAN BARU ---
 
             const animeInfo = 
 `✅ *Anime Ditemukan!*

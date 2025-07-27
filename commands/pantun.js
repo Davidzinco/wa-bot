@@ -5,9 +5,7 @@ module.exports = {
         const from = msg.key.remoteJid;
 
         const pantunList = [
-            // =================================
             // PANTUN KOCAK
-            // =================================
             "Burung perkutut, burung kutilang,\nkamu kentut nggak bilang-bilang.",
             "Makan jengkol perut melilit,\npunya utang pura-pura sakit.",
             "Jalan-jalan ke Bekasi,\nnaik ojek ongkosnya pas.\nHari gini masih galau, sini aku traktir es.",
@@ -20,9 +18,7 @@ module.exports = {
             "Di sini gunung di sana gunung,\ndi tengah-tengahnya Pulau Jawa.\nKamu bingung aku pun bingung,\nkenapa kita jadi ketawa?",
             "Beli duren ke Cikini,\npulangnya naik taksi.\nSadar diri dong, hei,\nkamu kan cuma teman fiksi.",
 
-            // =================================
             // PANTUN BUCIN
-            // =================================
             "Hari Minggu pergi ke pasar,\npulangnya beli alpukat.\nHatiku langsung bergetar,\nsetiap kali melihatmu lewat.",
             "Nonton drakor sampai pagi,\npemerannya ganteng-ganteng.\nTapi cuma kamu di hati,\nyang lain nggak ada yang penting.",
             "Makan bakso di Cimaung,\npedesnya bikin keringetan.\nDaripada aku bingung,\nmending langsung ke pelaminan.",
@@ -35,9 +31,7 @@ module.exports = {
             "Naik delman ke Surabaya,\nboleh dong aku bilang I love ya?",
             "Ada pelangi di kala senja,\nwarnanya indah tiada tara.\nWahai kamu yang di sana,\nkapan kita akan berjumpa?",
 
-            // =================================
             // PANTUN NGINGETIN & NASIHAT
-            // =================================
             "Langit malam penuh bintang,\nudaranya dingin banget.\nJangan sering-sering begadang,\nnanti sakit repot lho, inget.",
             "Beli kopi di warung Pak Amat,\nkopinya pahit bikin melek.\nKalau tugas belum tamat,\nbesok lanjut jangan capek.",
             "Lihat bulan di atas genteng,\ncahayanya terang sekali.\nUdah malam, ayo merem ganteng/cantik,\nbiar besok seger lagi.",
@@ -51,13 +45,10 @@ module.exports = {
             "Sore-sore enaknya ngeteh,\nsambil makan pisang goreng.\nJangan lupa istirahat ya,\nbiar pikiran jadi fresh.",
             "Ada semut di atas papan,\npapannya dari kayu jati.\nJangan lupa sarapan,\nbiar kuat hadapi hari ini.",
 
-            // =================================
             // PANTUN ORIGINAL
-            // =================================
             "Makan roti pakai selai,\nMinumnya teh anget-anget.\nNgoding dari pagi sampai selesai,\nDemi bot yang keren banget!"
         ];
 
-        // Ambil satu pantun secara acak
         const randomPantun = pantunList[Math.floor(Math.random() * pantunList.length)];
 
         console.log(`[Pantun] Mengirim pantun ke ${from}`);

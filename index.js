@@ -1,7 +1,6 @@
 // =================================================================
-//              index.js (FINAL DENGAN REQUEST & RESPONSE LOG)
+//              index.js (FIXED QR + LOGGING)
 // =================================================================
-
 const {
     default: makeWASocket,
     useMultiFileAuthState,
@@ -20,8 +19,8 @@ async function connectToWhatsApp() {
     
     const sock = makeWASocket({
         logger: pino({ level: 'silent' }),
-        auth: state,
-        printQRInTerminal: true
+        auth: state
+        // HAPUS: printQRInTerminal: true
     });
 
     // --- AWAL PEMBUNGKUS sendMessage UNTUK LOGGING RESPON ---
@@ -52,7 +51,28 @@ async function connectToWhatsApp() {
     };
     // --- AKHIR PEMBUNGKUS ---
 
+    // ---- BARU: listener untuk QR & reconnect ----
+    sock.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect, qr } = update;
 
+        if (qr) {
+            console.log(chalk.yellow('Scan QR di bawah ini:\n'));
+            qrcode.generate(qr, { small: true });
+        }
+
+        if (connection === 'close') {
+            const shouldReconnect = (lastDisconnect.error instanceof Boom) && lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut;
+            console.log(chalk.red('Koneksi tertutup'), shouldReconnect ? ', mencoba menyambung ulang...' : '');
+            if (shouldReconnect) connectToWhatsApp();
+        } else if (connection === 'open') {
+            console.log(chalk.blue.bold('Koneksi berhasil! Bot siap menerima perintah.'));
+        }
+    });
+    // ---- AKHIR QR listener ----
+
+    sock.ev.on('creds.update', saveCreds);
+
+    // LOAD COMMANDS
     sock.commands = new Map();
     const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
     for (const file of commandFiles) {
@@ -65,21 +85,10 @@ async function connectToWhatsApp() {
         }
     }
 
-    sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect } = update;
-        if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect.error instanceof Boom) && lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut;
-            if (shouldReconnect) connectToWhatsApp();
-        } else if (connection === 'open') {
-            console.log(chalk.blue.bold('Koneksi berhasil! Bot siap menerima perintah.'));
-        }
-    });
-
-    sock.ev.on('creds.update', saveCreds);
-
+    // HANDLER PESAN
     sock.ev.on('messages.upsert', async (m) => {
         const msg = m.messages[0];
-        if (!msg.message || msg.key.fromMe) return;
+        if (!msg.message) return;
 
         const prefix = '.';
         let body = msg.message.conversation || msg.message.extendedTextMessage?.text || msg.message.imageMessage?.caption || msg.message.videoMessage?.caption || '';
@@ -96,8 +105,8 @@ async function connectToWhatsApp() {
                     const cleanedText = body.replace(/@\d+/g, '').trim();
                     if (cleanedText.length > 0 && !cleanedText.startsWith(prefix)) {
                         let log = chalk.bgBlue.white(`[ MENTION DITERIMA ]`) + `\n... (log mention seperti sebelumnya) ...`;
-                        console.log(log); // Log untuk mention tetap ada
-                        const introMessage = `Halo! 👋 Ada yang bisa saya bantu?\n\nKetik *.about* untuk melihat daftar perintah yang tersedia.`;
+                        console.log(log);
+                        const introMessage = `Halo! 👋 Ada yang bisa saya bantu?\n\nKetik *.menu* untuk melihat daftar perintah yang tersedia.\n\nKetik *.about* untuk informasi lebih lanjut.`;
                         await sock.sendMessage(msg.key.remoteJid, { text: introMessage }, { quoted: msg });
                         return;
                     }

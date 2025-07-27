@@ -16,13 +16,11 @@ module.exports = {
             console.log(`[Wiki] Mencari: ${query}`);
             await sock.sendMessage(from, { text: 'Wait...' }, { quoted: msg });
 
-            // Mencari halaman di Wikipedia (bahasa Indonesia)
             const page = await wiki({ apiUrl: 'https://id.wikipedia.org/w/api.php' }).page(query);
             const summary = await page.summary();
             const imageUrl = await page.mainImage();
             const pageUrl = page.url();
 
-            // Batasi ringkasan agar tidak terlalu panjang
             const shortSummary = summary.substring(0, 400) + '...';
 
             const caption = `
@@ -34,7 +32,6 @@ ${shortSummary}
 ${pageUrl}
             `;
 
-            // Kirim gambar (jika ada) dengan caption ringkasan
             await sock.sendMessage(from, {
                 image: { url: imageUrl },
                 caption: caption

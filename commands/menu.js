@@ -16,7 +16,7 @@ Berikut daftar perintah yang bisa kamu gunakan:
 _Cek tanggal Hijriah hari ini._
 
 💡 *.katakata* 
-_Dapatkan kata-kata bijak._
+_Dapatkan kata-kata dari anime dan figur terkenal._
 
 🎭 *.pantun* 
 _Pantun acak untukmu._

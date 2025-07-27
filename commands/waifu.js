@@ -10,7 +10,6 @@ module.exports = {
         try {
             await sock.sendMessage(from, { text: 'Sedang mencari waifu...' }, { quoted: msg });
             
-            // 1. Ambil URL gambar dari API
             const apiResponse = await axios.get('https://api.waifu.pics/sfw/waifu');
             const imageUrl = apiResponse.data.url;
 
@@ -19,14 +18,12 @@ module.exports = {
                 return;
             }
 
-            // 2. Download gambar dari URL menjadi buffer
             const imageBuffer = await axios.get(imageUrl, {
-                responseType: 'arraybuffer' // Penting! Biar hasilnya jadi buffer
+                responseType: 'arraybuffer' 
             });
 
-            // 3. Kirim gambar dari buffer
             await sock.sendMessage(from, {
-                image: Buffer.from(imageBuffer.data), // Kirim buffer-nya
+                image: Buffer.from(imageBuffer.data), 
                 caption: 'Ini dia waifu untukmu, bang!'
             }, { quoted: msg });
 

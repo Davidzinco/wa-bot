@@ -12,9 +12,9 @@ module.exports = {
 - *.whatanime* - Mencari sumber anime dari screenshot.
 - *.ai [pertanyaan]* - Mengajukan pertanyaan ke AI.
 dan masih banyak lagi!
+Pembuat dari bot ini adalah @davidfes dan di kembangkan dari bot sebelumnya (Munakun) yang dibuat oleh @muhamadwiguna23
         `;
 
-        // Kirim pesan perkenalan
         await sock.sendMessage(from, { text: introMessage }, { quoted: msg });
     }
 };

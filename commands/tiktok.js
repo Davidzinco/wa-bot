@@ -1,9 +1,9 @@
 const axios = require('axios');
 
 /**
- * Fungsi untuk download video TikTok tanpa watermark
- * @param {string} url URL video TikTok
- * @returns {Promise<Buffer>} Buffer dari video mp4
+
+ * @param {string} url 
+ * @returns {Promise<Buffer>} 
  */
 async function downloadTikTok(url) {
     try {

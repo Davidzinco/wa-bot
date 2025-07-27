@@ -1,12 +1,11 @@
 /**
- * Fungsi untuk berinteraksi dengan Google Gemini AI
- * @param {string} prompt Pertanyaan atau perintah dari user
- * @returns {Promise<string>} Jawaban dari AI
+ * @param {string} prompt
+ * @returns {Promise<string>}
  */
 async function chatWithGemini(prompt) {
     try {
         console.log(`[Gemini AI] Mengirim prompt: "${prompt}"`);
-        const apiKey = "AIzaSyB137iAwbVB88PuLYekWx9SJCE_J6Ey6J8"; // API Key kamu
+        const apiKey = "AIzaSyB137iAwbVB88PuLYekWx9SJCE_J6Ey6J8"; // API Key
         if (!apiKey) return "Waduh, API Key Gemini belum dimasukkan.";
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;

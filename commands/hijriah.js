@@ -10,14 +10,12 @@ module.exports = {
             console.log(`[Hijriah] Mengambil data kalender...`);
             await sock.sendMessage(from, { text: 'Wait... 🌙' }, { quoted: msg });
 
-            // Mengambil tanggal hari ini
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const year = today.getFullYear();
             const formattedDate = `${day}-${month}-${year}`;
 
-            // Mengambil data dari API publik Aladhan
             const response = await axios.get(`http://api.aladhan.com/v1/gToH?date=${formattedDate}`);
             const data = response.data.data;
 

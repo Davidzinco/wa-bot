@@ -9,7 +9,6 @@ module.exports = {
         try {
             await sock.sendMessage(from, { text: 'Mencari info anime musim ini...' }, { quoted: msg });
 
-            // 1. Panggil Jikan API untuk season sekarang
             const response = await axios.get('https://api.jikan.moe/v4/seasons/now');
             const animeList = response.data.data;
 
@@ -18,8 +17,6 @@ module.exports = {
                 return;
             }
 
-            // 2. Format pesan balasan dengan rapi
-            // Kita ambil 5 anime teratas berdasarkan popularitas/skor untuk contoh
             let replyText = '📺 *Anime Paling Ditunggu Musim Ini*\n\n';
             
             const topAnime = animeList.slice(0, 5); // Ambil 5 pertama saja biar tidak spam
@@ -37,8 +34,6 @@ module.exports = {
 
             replyText += 'Data diambil dari MyAnimeList.';
 
-            // 3. Kirim pesan yang sudah diformat
-            // Kita bisa kirim gambar thumbnail dari anime pertama biar lebih keren
             const firstAnimeImageUrl = topAnime[0]?.images?.jpg?.large_image_url;
 
             if (firstAnimeImageUrl) {
@@ -47,7 +42,6 @@ module.exports = {
                     caption: replyText
                 }, { quoted: msg });
             } else {
-                // Jika tidak ada gambar, kirim teks saja
                 await sock.sendMessage(from, { text: replyText }, { quoted: msg });
             }
 

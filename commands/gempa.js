@@ -10,7 +10,6 @@ module.exports = {
             console.log(`[Gempa] Mengambil data dari BMKG...`);
             await sock.sendMessage(from, { text: 'Wait... 🌍' }, { quoted: msg });
 
-            // Mengambil data dari API publik BMKG
             const response = await axios.get('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
             const data = response.data.Infogempa.gempa;
 
@@ -27,7 +26,6 @@ module.exports = {
 
             const shakemapUrl = `https://data.bmkg.go.id/DataMKG/TEWS/${data.Shakemap}`;
 
-            // Kirim gambar peta guncangan dengan caption info gempa
             await sock.sendMessage(from, {
                 image: { url: shakemapUrl },
                 caption: caption

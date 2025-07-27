@@ -6,16 +6,15 @@ const path = require('path');
 
 
 
-// HAPUS FUNGSI createSticker LAMA, GANTI DENGAN INI
 async function createSticker(media, type, author, pack) {
     const sticker = new Sticker(media, {
-        pack: pack,         // Nama pack stiker
-        author: author,     // Nama author
-        type: type,         // Tipe stiker (default, crop, full)
-        quality: 50         // Kualitas stiker (opsional)
+        pack: pack,        
+        author: author,    
+        type: type,        
+        quality: 50        
     });
 
-    return await sticker.toBuffer(); // Langsung jadi buffer, siap kirim
+    return await sticker.toBuffer(); 
 }
 
 
@@ -24,8 +23,7 @@ module.exports = {
     description: 'Mengubah gambar/video menjadi stiker.',
     async execute(sock, msg, args) {
         const from = msg.key.remoteJid;
-        
-        // ... (kode untuk cek media & quoted media, tidak perlu diubah)
+
         const messageType = Object.keys(msg.message)[0];
         const isMedia = (messageType === 'imageMessage' || messageType === 'videoMessage');
         const isQuotedMedia = msg.message.extendedTextMessage?.contextInfo?.quotedMessage && (msg.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage || msg.message.extendedTextMessage.contextInfo.quotedMessage.videoMessage);
@@ -51,18 +49,15 @@ module.exports = {
         const stream = await downloadContentFromMessage(mediaMsg, mediaType.replace('Message', ''));
         let buffer = Buffer.from([]);
         for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
-        
-        // --- INI BAGIAN YANG DIPERBARUI ---
+
         try {
-            // Panggil fungsi createSticker yang baru dengan info author dan pack
             const stickerBuffer = await createSticker(
                 buffer, 
-                StickerTypes.DEFAULT, // Atau StickerTypes.CROPPED, StickerTypes.FULL
-                'Bot Keren',          // <- INI AUTHORNYA
-                'Sticker Anjay'       // <- INI NAMA PACKNYA
+                StickerTypes.DEFAULT, 
+                'Bot Keren',          
+                'Sticker Anjay'       
             );
-    
-            // Kirim stiker
+
             await sock.sendMessage(from, { sticker: stickerBuffer }, { quoted: msg });
 
         } catch (error) {

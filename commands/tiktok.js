@@ -47,7 +47,7 @@ module.exports = {
         const videoBuffer = await downloadTikTok(url);
         await sock.sendMessage(from, { 
             video: videoBuffer,
-            caption: 'Nih videonya, Muna-kun! Berhasil pakai teknik baru! ✨'
+            caption: 'Video TikTok berhasil didownload',
         }, { quoted: msg });
     }
 };

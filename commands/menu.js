@@ -33,6 +33,9 @@ _Cari info tentang anime yang sedang tayang musim ini._
 📖 *.anime <judul>*
 _Cari info tentang anime berdasarkan judul._
 
+📖 *.manga <judul>*
+_Cari info tentang Manga / Manhua / Manhwa berdasarkan judul._
+
 ━━━━━━━━━━━━━━━
 🛠️ *Tools Keren*
 ━━━━━━━━━━━━━━━
@@ -73,3 +76,4 @@ _Menampilkan informasi tentang bot._
         await sock.sendMessage(from, { text: menuText }, { quoted: msg });
     }
 };
+

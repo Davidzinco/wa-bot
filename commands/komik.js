@@ -8,24 +8,22 @@ module.exports = {
         const from = msg.key.remoteJid;
 
         if (args.length === 0) {
-            await sock.sendMessage(from, { text: 'Gunakan format: *.manga [judul manga]*' }, { quoted: msg });
+            await sock.sendMessage(from, { text: 'Gunakan format: *.komik [judul Manga / Manhua / Manhwa]*' }, { quoted: msg });
             return;
         }
 
         const query = args.join(' ');
         try {
-            await sock.sendMessage(from, { text: `🔎 Sedang mencari manga *"${query}"*...` }, { quoted: msg });
+            await sock.sendMessage(from, { text: `🔎 Sedang mencari komik *"${query}"*...` }, { quoted: msg });
 
-            // panggil endpoint manga Jikan
             const { data } = await axios.get(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=1`);
             const res = data.data[0];
 
             if (!res) {
-                await sock.sendMessage(from, { text: `Maaf, manga *"${query}"* tidak ditemukan.` }, { quoted: msg });
+                await sock.sendMessage(from, { text: `Maaf, komik *"${query}"* tidak ditemukan.` }, { quoted: msg });
                 return;
             }
 
-            // terjemah sinopsis
             let sinopsis = 'Tidak ada sinopsis.';
             if (res.synopsis) {
                 try {
@@ -37,7 +35,7 @@ module.exports = {
             }
 
             const info =
-`*📙 Manga Ditemukan!*
+`*📙 Komik Ditemukan!*
 
 *Judul:* ${res.title}
 *Judul Jepang:* ${res.title_japanese || '-'}

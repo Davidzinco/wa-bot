@@ -2,7 +2,7 @@ const axios = require('axios');
 const { translate } = require('@vitalets/google-translate-api');
 
 module.exports = {
-    name: 'manga',
+    name: 'komik',
     description: 'Mencari informasi manga / manhua / manhwa / donghua berdasarkan judul.',
     async execute(sock, msg, args) {
         const from = msg.key.remoteJid;

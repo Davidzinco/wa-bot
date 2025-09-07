@@ -14,12 +14,12 @@ module.exports = {
         const groupMetadata = await sock.groupMetadata(from);
         const participants = groupMetadata.participants;
 
-        let text = '📣 *SEMUANYA, KUMPUL!* 📣\n\n';
+        let text = '📣\n\n';
         let mentions = [];
 
         for (let participant of participants) {
             const userNumber = participant.id.split('@')[0];
-            text += `│ ↳ @${userNumber}\n`;
+            text += `↳ @${userNumber}\n`;
             mentions.push(participant.id);
         }
 
